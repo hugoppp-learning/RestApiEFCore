@@ -1,8 +1,6 @@
-﻿using System.IO.Enumeration;
-using DataStore.EF;
-using DataStore.EF.Models;
+﻿using Core.Models;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+using RestApiTutorial.Services;
 
 namespace RestApiTutorial.Controllers;
 
@@ -10,24 +8,24 @@ namespace RestApiTutorial.Controllers;
 [Route("api/[controller]")]
 public class TicketController : ControllerBase
 {
-    private MyContext db;
+    private ITicketService _tickets;
 
-    public TicketController(MyContext db)
+    public TicketController(ITicketService tickets)
     {
-        this.db = db;
+        _tickets = tickets;
     }
 
 
     [HttpGet("all")]
-    public async Task<IActionResult> GetById()
+    public async Task<IActionResult> GetAll()
     {
-        return Ok(await db.Tickets.ToListAsync());
+        return Ok(await _tickets.GetAll());
     }
 
     [HttpGet("{id}")]
     public async Task<IActionResult> GetById(int id)
     {
-        Ticket? ticket = await db.Tickets.FindAsync(id);
+        Ticket? ticket = await _tickets.GetById(id);
         if (ticket is null)
             return NotFound();
 
@@ -38,16 +36,15 @@ public class TicketController : ControllerBase
     [HttpPost()]
     public async Task<IActionResult> Create([FromBody] Ticket ticket)
     {
-        if (db.Projects.Find(ticket.ProjectId) is null)
+        if (await _tickets.Create(ticket))
+        {
+            return CreatedAtAction(nameof(GetAll),
+                new { id = ticket.TicketId },
+                ticket
+            );
+        }
+        else
             return UnprocessableEntity($"Project with id {ticket.ProjectId} does not exist");
-
-        db.Tickets.Add(ticket);
-        await db.SaveChangesAsync();
-
-        return CreatedAtAction(nameof(GetById),
-            new { id = ticket.TicketId },
-            ticket
-        );
     }
 
     [HttpPut("{id}")]
@@ -56,18 +53,8 @@ public class TicketController : ControllerBase
         if (id != ticket.TicketId)
             return UnprocessableEntity("Id doesn't match");
 
-        db.Entry(ticket).State = EntityState.Modified;
-        try
-        {
-            await db.SaveChangesAsync();
-        }
-        catch (Exception e)
-        {
-            if (db.Projects.Find(id) == null)
-                return NotFound();
-
-            throw;
-        }
+        if (!await _tickets.Update(ticket))
+            return NotFound();
 
         return NoContent();
     }
@@ -75,12 +62,9 @@ public class TicketController : ControllerBase
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(int id)
     {
-        Ticket? ticket = db.Tickets.Find(id);
-        if (ticket is null)
+        if (!await _tickets.Delete(id))
             return NotFound();
 
-        db.Tickets.Remove(ticket);
-        await db.SaveChangesAsync();
         return NoContent();
     }
 

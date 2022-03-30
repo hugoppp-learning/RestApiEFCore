@@ -1,6 +1,6 @@
-using System.Text.Json.Serialization;
 using DataStore.EF;
 using Microsoft.EntityFrameworkCore;
+using RestApiTutorial.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,7 +15,7 @@ builder.Services.AddSwaggerGen();
     builder.Services.AddDbContext<MyContext>(options => options.UseInMemoryDatabase("MyDB"));
 // }
 
-
+builder.Services.RegisterServices();
 
 
 var app = builder.Build();

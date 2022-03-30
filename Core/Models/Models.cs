@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace DataStore.EF.Models;
+namespace Core.Models;
 
 public class Ticket
 {

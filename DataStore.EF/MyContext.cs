@@ -1,4 +1,4 @@
-﻿using DataStore.EF.Models;
+﻿using Core.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace DataStore.EF;

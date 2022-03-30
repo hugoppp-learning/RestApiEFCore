@@ -4,6 +4,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RestApiTutorial", "RestApiT
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataStore.EF", "DataStore.EF\DataStore.EF.csproj", "{AD746EDE-B3F3-4DCA-B722-13D9802B92DE}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Core", "Core\Core.csproj", "{C484A617-0BB0-4DAE-98B5-52AC18FB42A3}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -18,5 +20,9 @@ Global
 		{AD746EDE-B3F3-4DCA-B722-13D9802B92DE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AD746EDE-B3F3-4DCA-B722-13D9802B92DE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AD746EDE-B3F3-4DCA-B722-13D9802B92DE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C484A617-0BB0-4DAE-98B5-52AC18FB42A3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C484A617-0BB0-4DAE-98B5-52AC18FB42A3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C484A617-0BB0-4DAE-98B5-52AC18FB42A3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C484A617-0BB0-4DAE-98B5-52AC18FB42A3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

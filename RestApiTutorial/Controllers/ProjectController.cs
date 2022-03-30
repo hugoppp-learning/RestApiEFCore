@@ -1,7 +1,6 @@
-using DataStore.EF;
-using DataStore.EF.Models;
+using Core.Models;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+using RestApiTutorial.Services;
 
 namespace RestApiTutorial.Controllers;
 
@@ -9,23 +8,26 @@ namespace RestApiTutorial.Controllers;
 [Route("api/[controller]")]
 public class ProjectController : ControllerBase
 {
-    private MyContext db;
 
-    public ProjectController(MyContext db)
+    private IProjectService _projectService;
+    private ITicketService _ticketService;
+
+    public ProjectController(IProjectService projectService, ITicketService ticketService)
     {
-        this.db = db;
+        _projectService = projectService;
+        _ticketService = ticketService;
     }
 
     [HttpGet("all")]
     public async Task<IActionResult> Get()
     {
-        return Ok(await db.Projects.ToListAsync());
+        return Ok(await _projectService.GetAll());
     }
 
     [HttpGet("{id}")]
     public async Task<IActionResult> GetById(int id)
     {
-        Project? project = await db.Projects.FindAsync(id);
+        Project? project = await _projectService.GetById(id);
         if (project is null)
             return NotFound();
 
@@ -37,10 +39,10 @@ public class ProjectController : ControllerBase
     {
         if (tId is null)
         {
-            List<Ticket> tickets = await db.Tickets.Where(t => t.ProjectId == pId).ToListAsync();
+            List<Ticket> tickets = await _ticketService.GetTicketsInProject(pId);
             if (!tickets.Any())
             {
-                if (db.Projects.Find(pId) is null)
+                if (await _projectService.GetById(pId) is null)
                     return NotFound();
             }
 
@@ -54,8 +56,7 @@ public class ProjectController : ControllerBase
     [HttpPost()]
     public async Task<IActionResult> Create([FromBody] Project project)
     {
-        db.Projects.Add(project);
-        await db.SaveChangesAsync();
+        await _projectService.Add(project);
 
         return CreatedAtAction(nameof(GetById), new { id = project.ProjectId }, project);
     }
@@ -66,32 +67,19 @@ public class ProjectController : ControllerBase
         if (id != project.ProjectId)
             return UnprocessableEntity("Id doesn't match");
 
-        db.Entry(project).State = EntityState.Modified;
-        try
-        {
-            await db.SaveChangesAsync();
-        }
-        catch (Exception e)
-        {
-            if (db.Projects.Find(id) == null)
-                return NotFound();
-
-            throw;
-        }
-
-        return NoContent();
+        if (await _projectService.Update(project))
+            return NoContent();
+        else
+            return NotFound();
     }
 
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(int id)
     {
-        Project? project = db.Projects.Find(id);
-        if (project is null)
+        if (await _projectService.Delete(id))
+            return NoContent();
+        else
             return NotFound();
-
-        db.Projects.Remove(project);
-        await db.SaveChangesAsync();
-        return NoContent();
     }
 
 
