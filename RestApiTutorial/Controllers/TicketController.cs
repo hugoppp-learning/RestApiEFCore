@@ -1,8 +1,9 @@
-﻿using System.IO.Enumeration;
+﻿using AutoMapper;
 using DataStore.EF;
 using DataStore.EF.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using RestApiTutorial.DTOs;
 
 namespace RestApiTutorial.Controllers;
 
@@ -11,17 +12,20 @@ namespace RestApiTutorial.Controllers;
 public class TicketController : ControllerBase
 {
     private MyContext db;
+    private readonly IMapper _mapper;
 
-    public TicketController(MyContext db)
+    public TicketController(MyContext db, IMapper mapper)
     {
         this.db = db;
+        _mapper = mapper;
     }
 
 
     [HttpGet("all")]
-    public async Task<IActionResult> GetById()
+    public async Task<IActionResult> GetAll()
     {
-        return Ok(await db.Tickets.ToListAsync());
+        List<Ticket> tickets = await db.Tickets.ToListAsync();
+        return Ok(_mapper.Map<IEnumerable<TicketDto>>(tickets));
     }
 
     [HttpGet("{id}")]
@@ -31,32 +35,33 @@ public class TicketController : ControllerBase
         if (ticket is null)
             return NotFound();
 
-        return Ok(ticket);
+        return Ok(_mapper.Map<TicketDto>(ticket));
     }
 
 
     [HttpPost()]
-    public async Task<IActionResult> Create([FromBody] Ticket ticket)
+    public async Task<IActionResult> Create([FromBody] CreateTicketDto ticketDto)
     {
-        if (db.Projects.Find(ticket.ProjectId) is null)
-            return UnprocessableEntity($"Project with id {ticket.ProjectId} does not exist");
+        if (db.Projects.Find(ticketDto.ProjectId) is null)
+            return UnprocessableEntity($"Project with id {ticketDto.ProjectId} does not exist");
 
+        Ticket ticket = _mapper.Map<Ticket>(ticketDto);
         db.Tickets.Add(ticket);
         await db.SaveChangesAsync();
 
-        return CreatedAtAction(nameof(GetById),
+        return CreatedAtAction(nameof(GetAll),
             new { id = ticket.TicketId },
-            ticket
+            _mapper.Map<TicketDto>(ticket)
         );
     }
 
     [HttpPut("{id}")]
-    public async Task<IActionResult> Update(int id, [FromBody] Ticket ticket)
+    public async Task<IActionResult> Update(int id, [FromBody] TicketDto ticketDto)
     {
-        if (id != ticket.TicketId)
+        if (id != ticketDto.TicketId)
             return UnprocessableEntity("Id doesn't match");
 
-        db.Entry(ticket).State = EntityState.Modified;
+        db.Entry(_mapper.Map<Ticket>(ticketDto)).State = EntityState.Modified;
         try
         {
             await db.SaveChangesAsync();

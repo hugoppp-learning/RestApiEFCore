@@ -1,7 +1,9 @@
+using AutoMapper;
 using DataStore.EF;
 using DataStore.EF.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using RestApiTutorial.DTOs;
 
 namespace RestApiTutorial.Controllers;
 
@@ -10,16 +12,19 @@ namespace RestApiTutorial.Controllers;
 public class ProjectController : ControllerBase
 {
     private MyContext db;
+    private readonly IMapper _mapper;
 
-    public ProjectController(MyContext db)
+    public ProjectController(MyContext db, IMapper mapper)
     {
         this.db = db;
+        _mapper = mapper;
     }
 
     [HttpGet("all")]
-    public async Task<IActionResult> Get()
+    public async Task<IActionResult> GetAll()
     {
-        return Ok(await db.Projects.ToListAsync());
+        List<Project> projects = await db.Projects.ToListAsync();
+        return Ok(_mapper.Map<IEnumerable<ProjectDto>>(projects));
     }
 
     [HttpGet("{id}")]
@@ -29,7 +34,7 @@ public class ProjectController : ControllerBase
         if (project is null)
             return NotFound();
 
-        return Ok(project);
+        return Ok(_mapper.Map<ProjectDto>(project));
     }
 
     [HttpGet("{pid}/tickets")]
@@ -44,7 +49,7 @@ public class ProjectController : ControllerBase
                     return NotFound();
             }
 
-            return Ok(tickets);
+            return Ok(_mapper.Map<IEnumerable<TicketDto>>(tickets));
         }
 
         return Ok($"getting ticket {tId} of project {pId}");
@@ -52,8 +57,9 @@ public class ProjectController : ControllerBase
 
 
     [HttpPost()]
-    public async Task<IActionResult> Create([FromBody] Project project)
+    public async Task<IActionResult> Create([FromBody] CreateProjectDto createProjectDto)
     {
+        Project project = _mapper.Map<Project>(createProjectDto);
         db.Projects.Add(project);
         await db.SaveChangesAsync();
 
@@ -61,11 +67,12 @@ public class ProjectController : ControllerBase
     }
 
     [HttpPut("{id}")]
-    public async Task<IActionResult> Update(int id, [FromBody] Project project)
+    public async Task<IActionResult> Update(int id, [FromBody] ProjectDto projectDto)
     {
-        if (id != project.ProjectId)
+        if (id != projectDto.ProjectId)
             return UnprocessableEntity("Id doesn't match");
 
+        Project project = _mapper.Map<Project>(projectDto);
         db.Entry(project).State = EntityState.Modified;
         try
         {
