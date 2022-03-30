@@ -9,11 +9,9 @@ public class MapperProfile : Profile
     public MapperProfile()
     {
         CreateMap<CreateTicketDto, Ticket>();
-        CreateMap<TicketDto, Ticket>();
-        CreateMap<Ticket, TicketDto>();
+        CreateMap<TicketDto, Ticket>().ReverseMap();
 
         CreateMap<CreateProjectDto, Project>();
-        CreateMap<ProjectDto, Project>();
-        CreateMap<Project, ProjectDto>();
+        CreateMap<ProjectDto, Project>().ReverseMap();
     }
 }
