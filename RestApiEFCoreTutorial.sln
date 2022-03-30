@@ -1,0 +1,22 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RestApiTutorial", "RestApiTutorial\RestApiTutorial.csproj", "{C964FDA7-39A4-4513-AEA2-7CC75578F912}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataStore.EF", "DataStore.EF\DataStore.EF.csproj", "{AD746EDE-B3F3-4DCA-B722-13D9802B92DE}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{C964FDA7-39A4-4513-AEA2-7CC75578F912}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C964FDA7-39A4-4513-AEA2-7CC75578F912}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C964FDA7-39A4-4513-AEA2-7CC75578F912}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C964FDA7-39A4-4513-AEA2-7CC75578F912}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AD746EDE-B3F3-4DCA-B722-13D9802B92DE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AD746EDE-B3F3-4DCA-B722-13D9802B92DE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AD746EDE-B3F3-4DCA-B722-13D9802B92DE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AD746EDE-B3F3-4DCA-B722-13D9802B92DE}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
