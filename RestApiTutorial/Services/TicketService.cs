@@ -1,6 +1,8 @@
-﻿using Core.Models;
+﻿using AutoMapper;
 using DataStore.EF;
 using Microsoft.EntityFrameworkCore;
+using RestApiTutorial.DTOs;
+using Ticket = DataStore.EF.Ticket;
 
 namespace RestApiTutorial.Services;
 
@@ -9,18 +11,20 @@ public interface ITicketService
     Task<List<Ticket>> GetTicketsInProject(int pId);
     Task<List<Ticket>> GetAll();
     ValueTask<Ticket?> GetById(int id);
-    Task<bool> Create(Ticket ticket);
-    Task<bool> Update(Ticket ticket);
+    Task<Ticket> Create(CreateTicketDto createTicketDto);
+    Task<bool> Update(TicketDto ticketDto);
     Task<bool> Delete(int id);
 }
 
 public class TicketService : ITicketService
 {
     private MyContext db;
+    private IMapper _mapper;
 
-    public TicketService(MyContext db)
+    public TicketService(MyContext db, IMapper mapper)
     {
         this.db = db;
+        _mapper = mapper;
     }
 
     public Task<List<Ticket>> GetTicketsInProject(int pId)
@@ -38,18 +42,17 @@ public class TicketService : ITicketService
         return db.Tickets.FindAsync(id);
     }
 
-    public async Task<bool> Create(Ticket ticket)
+    public async Task<Ticket> Create(CreateTicketDto createTicketDto)
     {
-        if (db.Tickets.Find(ticket.TicketId) is null)
-            return false;
-
+        var ticket = _mapper.Map<Ticket>(createTicketDto);
         db.Tickets.Add(ticket);
         await db.SaveChangesAsync();
-        return true;
+        return ticket;
     }
 
-    public async Task<bool> Update(Ticket ticket)
+    public async Task<bool> Update(TicketDto ticketDto)
     {
+        var ticket = _mapper.Map<Ticket>(ticketDto);
         db.Entry(ticket).State = EntityState.Modified;
         try
         {

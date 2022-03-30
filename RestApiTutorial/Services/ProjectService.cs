@@ -1,6 +1,7 @@
-﻿using Core.Models;
+﻿using AutoMapper;
 using DataStore.EF;
 using Microsoft.EntityFrameworkCore;
+using RestApiTutorial.DTOs;
 
 namespace RestApiTutorial.Services;
 
@@ -8,8 +9,8 @@ public interface IProjectService
 {
     Task<List<Project>> GetAll();
     ValueTask<Project?> GetById(int id);
-    Task Add(Project project);
-    Task<bool> Update(Project project);
+    Task<Project> Add(CreateProjectDto createProjectDto);
+    Task<bool> Update(ProjectDto projectDto);
     Task<bool> Delete(int id);
 }
 
@@ -17,10 +18,12 @@ public class ProjectService : IProjectService
 {
 
     private MyContext db;
+    private IMapper _mapper;
 
-    public ProjectService(MyContext db)
+    public ProjectService(MyContext db, IMapper mapper)
     {
         this.db = db;
+        _mapper = mapper;
     }
 
     public Task<List<Project>> GetAll()
@@ -33,14 +36,17 @@ public class ProjectService : IProjectService
         return db.Projects.FindAsync(id);
     }
 
-    public async Task Add(Project project)
+    public async Task<Project> Add(CreateProjectDto createProjectDto)
     {
+        var project = _mapper.Map<Project>(createProjectDto);
         db.Projects.Add(project);
         await db.SaveChangesAsync();
+        return project;
     }
 
-    public async Task<bool> Update(Project project)
+    public async Task<bool> Update(ProjectDto projectDto)
     {
+        var project = _mapper.Map<Project>(projectDto);
         db.Entry(project).State = EntityState.Modified;
         try
         {

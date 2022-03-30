@@ -1,6 +1,4 @@
-﻿using System.Text.Json.Serialization;
-
-namespace Core.Models;
+﻿namespace DataStore.EF;
 
 public class Ticket
 {
@@ -12,7 +10,6 @@ public class Ticket
 
     public string? Description { get; init; }
 
-    [JsonIgnore]
     public Project? Project { get; init; }
 
 }
@@ -23,6 +20,5 @@ public class Project
 
     public string? Title { get; init; }
 
-    [JsonIgnore]
     public List<Ticket>? Tickets { get; init; }
 }

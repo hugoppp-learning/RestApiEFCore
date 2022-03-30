@@ -1,5 +1,7 @@
-using Core.Models;
+using AutoMapper;
+using DataStore.EF;
 using Microsoft.AspNetCore.Mvc;
+using RestApiTutorial.DTOs;
 using RestApiTutorial.Services;
 
 namespace RestApiTutorial.Controllers;
@@ -11,17 +13,20 @@ public class ProjectController : ControllerBase
 
     private IProjectService _projectService;
     private ITicketService _ticketService;
+    private IMapper _mapper;
 
-    public ProjectController(IProjectService projectService, ITicketService ticketService)
+    public ProjectController(IProjectService projectService, ITicketService ticketService, IMapper mapper)
     {
         _projectService = projectService;
         _ticketService = ticketService;
+        _mapper = mapper;
     }
 
     [HttpGet("all")]
-    public async Task<IActionResult> Get()
+    public async Task<IActionResult> GetAll()
     {
-        return Ok(await _projectService.GetAll());
+        List<Project> projects = await _projectService.GetAll();
+        return Ok(projects.Select(p => _mapper.Map<ProjectDto>(p)));
     }
 
     [HttpGet("{id}")]
@@ -31,7 +36,7 @@ public class ProjectController : ControllerBase
         if (project is null)
             return NotFound();
 
-        return Ok(project);
+        return Ok(_mapper.Map<ProjectDto>(project));
     }
 
     [HttpGet("{pid}/tickets")]
@@ -46,7 +51,7 @@ public class ProjectController : ControllerBase
                     return NotFound();
             }
 
-            return Ok(tickets);
+            return Ok(tickets.Select(t => _mapper.Map<TicketDto>(t)));
         }
 
         return Ok($"getting ticket {tId} of project {pId}");
@@ -54,20 +59,21 @@ public class ProjectController : ControllerBase
 
 
     [HttpPost()]
-    public async Task<IActionResult> Create([FromBody] Project project)
+    public async Task<IActionResult> Create([FromBody] CreateProjectDto createProjectDto)
     {
-        await _projectService.Add(project);
+        Project project = await _projectService.Add(createProjectDto);
 
-        return CreatedAtAction(nameof(GetById), new { id = project.ProjectId }, project);
+        return CreatedAtAction(nameof(GetById), new { id = createProjectDto },
+            _mapper.Map<ProjectDto>(project));
     }
 
     [HttpPut("{id}")]
-    public async Task<IActionResult> Update(int id, [FromBody] Project project)
+    public async Task<IActionResult> Update(int id, [FromBody] ProjectDto projectDto)
     {
-        if (id != project.ProjectId)
+        if (id != projectDto.ProjectId)
             return UnprocessableEntity("Id doesn't match");
 
-        if (await _projectService.Update(project))
+        if (await _projectService.Update(projectDto))
             return NoContent();
         else
             return NotFound();

@@ -1,5 +1,7 @@
-﻿using Core.Models;
+﻿using AutoMapper;
+using DataStore.EF;
 using Microsoft.AspNetCore.Mvc;
+using RestApiTutorial.DTOs;
 using RestApiTutorial.Services;
 
 namespace RestApiTutorial.Controllers;
@@ -9,17 +11,19 @@ namespace RestApiTutorial.Controllers;
 public class TicketController : ControllerBase
 {
     private ITicketService _tickets;
+    private readonly IMapper _mapper;
 
-    public TicketController(ITicketService tickets)
+    public TicketController(ITicketService tickets, IMapper mapper)
     {
         _tickets = tickets;
+        _mapper = mapper;
     }
 
 
     [HttpGet("all")]
     public async Task<IActionResult> GetAll()
     {
-        return Ok(await _tickets.GetAll());
+        return Ok((await _tickets.GetAll()).Select(t => _mapper.Map<TicketDto>(t)));
     }
 
     [HttpGet("{id}")]
@@ -29,26 +33,22 @@ public class TicketController : ControllerBase
         if (ticket is null)
             return NotFound();
 
-        return Ok(ticket);
+        return Ok(_mapper.Map<TicketDto>(ticket));
     }
 
 
     [HttpPost()]
-    public async Task<IActionResult> Create([FromBody] Ticket ticket)
+    public async Task<IActionResult> Create([FromBody] CreateTicketDto createTicketDto)
     {
-        if (await _tickets.Create(ticket))
-        {
-            return CreatedAtAction(nameof(GetAll),
-                new { id = ticket.TicketId },
-                ticket
-            );
-        }
-        else
-            return UnprocessableEntity($"Project with id {ticket.ProjectId} does not exist");
+        Ticket ticket = await _tickets.Create(createTicketDto);
+        return CreatedAtAction(nameof(GetAll),
+            new { id = ticket.TicketId },
+            _mapper.Map<TicketDto>(ticket)
+        );
     }
 
     [HttpPut("{id}")]
-    public async Task<IActionResult> Update(int id, [FromBody] Ticket ticket)
+    public async Task<IActionResult> Update(int id, [FromBody] TicketDto ticket)
     {
         if (id != ticket.TicketId)
             return UnprocessableEntity("Id doesn't match");

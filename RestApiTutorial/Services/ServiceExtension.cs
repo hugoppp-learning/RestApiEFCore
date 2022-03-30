@@ -5,8 +5,8 @@ public static class ServiceExtension
     public static IServiceCollection RegisterServices(this IServiceCollection serviceCollection)
     {
         return serviceCollection
-            .AddScoped<ProjectService>()
-            .AddScoped<TicketService>()
+            .AddScoped<IProjectService, ProjectService>()
+            .AddScoped<ITicketService, TicketService>()
             ;
     }
 }
