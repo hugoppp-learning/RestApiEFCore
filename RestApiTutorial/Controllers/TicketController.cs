@@ -42,7 +42,7 @@ public class TicketController : ControllerBase
     [HttpPost()]
     public async Task<IActionResult> Create([FromBody] CreateTicketDto ticketDto)
     {
-        if (db.Projects.Find(ticketDto.ProjectId) is null)
+        if (!await db.Projects.AnyAsync(p => p.ProjectId == ticketDto.ProjectId))
             return UnprocessableEntity($"Project with id {ticketDto.ProjectId} does not exist");
 
         Ticket ticket = _mapper.Map<Ticket>(ticketDto);
@@ -68,7 +68,7 @@ public class TicketController : ControllerBase
         }
         catch (Exception e)
         {
-            if (db.Projects.Find(id) == null)
+            if (!await db.Projects.AnyAsync(p => p.ProjectId == id))
                 return NotFound();
 
             throw;
