@@ -5,7 +5,11 @@ namespace DataStore.EF;
 
 public class MyContext : DbContext
 {
-    public MyContext(DbContextOptions options) : base(options)
+    public MyContext(DbContextOptions<MyContext> options) : base(options)
+    {
+    }
+
+    public MyContext()
     {
     }
 
