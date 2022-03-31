@@ -19,6 +19,9 @@ public class MyContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<Ticket>()
+            .HasKey(ticket => new { ticket.ProjectId, ticket.TicketId });
+
         modelBuilder.Entity<Project>()
             .HasMany(p => p.Tickets)
             .WithOne(t => t.Project)
@@ -33,8 +36,8 @@ public class MyContext : DbContext
             new Ticket { ProjectId = 1, TicketId = 1, Title = "ticket 1", Description = "Lorem" },
             new Ticket { ProjectId = 1, TicketId = 2, Title = "ticket 2", Description = "ipsum" },
             new Ticket { ProjectId = 1, TicketId = 3, Title = "ticket 3" },
-            new Ticket { ProjectId = 2, TicketId = 4, Title = "ticket 4" },
-            new Ticket { ProjectId = 2, TicketId = 5, Title = "ticket 5" }
+            new Ticket { ProjectId = 2, TicketId = 1, Title = "ticket 4" },
+            new Ticket { ProjectId = 2, TicketId = 2, Title = "ticket 5" }
         );
     }
 }

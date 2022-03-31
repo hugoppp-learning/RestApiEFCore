@@ -17,12 +17,16 @@ builder.Services.AddDbContext<MyContext>(
         string provider = builder.Configuration.GetValue<string>("provider");
         _ = provider switch
         {
-            "InMemory" => option.UseInMemoryDatabase("MyDb"),
+            "InMemory" => option
+                .UseInMemoryDatabase("MyDb")
+                .AddAllTriggers(),
+
             "Postgres" =>
-                option.UseNpgsql(
-                    builder.Configuration.GetConnectionString("postgres"),
-                    x => x.MigrationsAssembly("DataStore.EF")
-                ),
+                option
+                    .UseNpgsql(
+                        builder.Configuration.GetConnectionString("postgres"),
+                        x => x.MigrationsAssembly("DataStore.EF"))
+                    .AddAllTriggers(),
             _ => throw new ArgumentOutOfRangeException($"Unsuported provider {provider}")
         };
     });

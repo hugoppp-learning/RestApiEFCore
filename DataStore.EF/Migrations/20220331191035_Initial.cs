@@ -26,15 +26,14 @@ namespace DataStore.EF.Migrations
                 name: "Tickets",
                 columns: table => new
                 {
-                    TicketId = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    TicketId = table.Column<int>(type: "integer", nullable: false),
                     ProjectId = table.Column<int>(type: "integer", nullable: false),
                     Title = table.Column<string>(type: "text", nullable: true),
                     Description = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Tickets", x => x.TicketId);
+                    table.PrimaryKey("PK_Tickets", x => new { x.ProjectId, x.TicketId });
                     table.ForeignKey(
                         name: "FK_Tickets_Projects_ProjectId",
                         column: x => x.ProjectId,
@@ -54,20 +53,15 @@ namespace DataStore.EF.Migrations
 
             migrationBuilder.InsertData(
                 table: "Tickets",
-                columns: new[] { "TicketId", "Description", "ProjectId", "Title" },
+                columns: new[] { "ProjectId", "TicketId", "Description", "Title" },
                 values: new object[,]
                 {
-                    { 1, "Lorem", 1, "ticket 1" },
-                    { 2, "ipsum", 1, "ticket 2" },
-                    { 3, null, 1, "ticket 3" },
-                    { 4, null, 2, "ticket 4" },
-                    { 5, null, 2, "ticket 5" }
+                    { 1, 1, "Lorem", "ticket 1" },
+                    { 1, 2, "ipsum", "ticket 2" },
+                    { 1, 3, null, "ticket 3" },
+                    { 2, 1, null, "ticket 4" },
+                    { 2, 2, null, "ticket 5" }
                 });
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Tickets_ProjectId",
-                table: "Tickets",
-                column: "ProjectId");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)

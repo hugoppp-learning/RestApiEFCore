@@ -9,12 +9,12 @@ namespace RestApiTutorial.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class ProjectController : ControllerBase
+public class ProjectsController : ControllerBase
 {
     private MyContext db;
     private readonly IMapper _mapper;
 
-    public ProjectController(MyContext db, IMapper mapper)
+    public ProjectsController(MyContext db, IMapper mapper)
     {
         this.db = db;
         _mapper = mapper;
@@ -78,7 +78,7 @@ public class ProjectController : ControllerBase
         {
             await db.SaveChangesAsync();
         }
-        catch (Exception e)
+        catch (Exception)
         {
             if (db.Projects.Find(id) == null)
                 return NotFound();

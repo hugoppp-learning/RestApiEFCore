@@ -8,7 +8,7 @@ using RestApiTutorial.DTOs;
 namespace RestApiTutorial.Controllers;
 
 [ApiController()]
-[Route("api/[controller]")]
+[Route("api/projects/{projectId}/tickets")]
 public class TicketController : ControllerBase
 {
     private MyContext db;
@@ -20,18 +20,17 @@ public class TicketController : ControllerBase
         _mapper = mapper;
     }
 
-
-    [HttpGet("all")]
-    public async Task<IActionResult> GetAll()
+    [HttpGet]
+    public async Task<IActionResult> GetAll(int projectId)
     {
-        List<Ticket> tickets = await db.Tickets.ToListAsync();
+        List<Ticket> tickets = await db.Tickets.Where(t => t.ProjectId == projectId).ToListAsync();
         return Ok(_mapper.Map<IEnumerable<TicketDto>>(tickets));
     }
 
-    [HttpGet("{id}")]
-    public async Task<IActionResult> GetById(int id)
+    [HttpGet("{ticketId}")]
+    public async Task<IActionResult> GetById(int projectId, int ticketId)
     {
-        Ticket? ticket = await db.Tickets.FindAsync(id);
+        Ticket? ticket = await db.Tickets.FindAsync(projectId, ticketId);
         if (ticket is null)
             return NotFound();
 
@@ -39,9 +38,12 @@ public class TicketController : ControllerBase
     }
 
 
-    [HttpPost()]
-    public async Task<IActionResult> Create([FromBody] CreateTicketDto ticketDto)
+    [HttpPost]
+    public async Task<IActionResult> Create(int projectId, [FromBody] CreateTicketDto ticketDto)
     {
+        if (projectId != ticketDto.ProjectId)
+            return UnprocessableEntity();
+
         if (!await db.Projects.AnyAsync(p => p.ProjectId == ticketDto.ProjectId))
             return UnprocessableEntity($"Project with id {ticketDto.ProjectId} does not exist");
 
@@ -49,26 +51,26 @@ public class TicketController : ControllerBase
         db.Tickets.Add(ticket);
         await db.SaveChangesAsync();
 
-        return CreatedAtAction(nameof(GetAll),
-            new { id = ticket.TicketId },
+        return CreatedAtAction(nameof(GetById),
+            new { ticket.TicketId, projectId },
             _mapper.Map<TicketDto>(ticket)
         );
     }
 
-    [HttpPut("{id}")]
-    public async Task<IActionResult> Update(int id, [FromBody] TicketDto ticketDto)
+    [HttpPut("{ticketId}")]
+    public async Task<IActionResult> Update(int projectId, int ticketId, [FromBody] TicketDto ticketDto)
     {
-        if (id != ticketDto.TicketId)
-            return UnprocessableEntity("Id doesn't match");
+        if (ticketId != ticketDto.TicketId || projectId != ticketDto.ProjectId)
+            return UnprocessableEntity();
 
         db.Entry(_mapper.Map<Ticket>(ticketDto)).State = EntityState.Modified;
         try
         {
             await db.SaveChangesAsync();
         }
-        catch (Exception e)
+        catch (Exception)
         {
-            if (!await db.Projects.AnyAsync(p => p.ProjectId == id))
+            if (!await db.Projects.AnyAsync(p => p.ProjectId == ticketId))
                 return NotFound();
 
             throw;
@@ -77,10 +79,10 @@ public class TicketController : ControllerBase
         return NoContent();
     }
 
-    [HttpDelete("{id}")]
-    public async Task<IActionResult> Delete(int id)
+    [HttpDelete("{ticketId}")]
+    public async Task<IActionResult> Delete(int projectId, int ticketId)
     {
-        Ticket? ticket = db.Tickets.Find(id);
+        Ticket? ticket = db.Tickets.Find(projectId, ticketId);
         if (ticket is null)
             return NotFound();
 

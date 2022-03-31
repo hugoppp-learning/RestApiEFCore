@@ -11,7 +11,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DataStore.EF.Migrations
 {
     [DbContext(typeof(MyContext))]
-    [Migration("20220331170305_Initial")]
+    [Migration("20220331191035_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -54,58 +54,53 @@ namespace DataStore.EF.Migrations
 
             modelBuilder.Entity("DataStore.EF.Models.Ticket", b =>
                 {
-                    b.Property<int>("TicketId")
-                        .ValueGeneratedOnAdd()
+                    b.Property<int>("ProjectId")
                         .HasColumnType("integer");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("TicketId"));
+                    b.Property<int>("TicketId")
+                        .HasColumnType("integer");
 
                     b.Property<string>("Description")
                         .HasColumnType("text");
 
-                    b.Property<int>("ProjectId")
-                        .HasColumnType("integer");
-
                     b.Property<string>("Title")
                         .HasColumnType("text");
 
-                    b.HasKey("TicketId");
-
-                    b.HasIndex("ProjectId");
+                    b.HasKey("ProjectId", "TicketId");
 
                     b.ToTable("Tickets");
 
                     b.HasData(
                         new
                         {
+                            ProjectId = 1,
                             TicketId = 1,
                             Description = "Lorem",
-                            ProjectId = 1,
                             Title = "ticket 1"
                         },
                         new
                         {
+                            ProjectId = 1,
                             TicketId = 2,
                             Description = "ipsum",
-                            ProjectId = 1,
                             Title = "ticket 2"
                         },
                         new
                         {
-                            TicketId = 3,
                             ProjectId = 1,
+                            TicketId = 3,
                             Title = "ticket 3"
                         },
                         new
                         {
-                            TicketId = 4,
                             ProjectId = 2,
+                            TicketId = 1,
                             Title = "ticket 4"
                         },
                         new
                         {
-                            TicketId = 5,
                             ProjectId = 2,
+                            TicketId = 2,
                             Title = "ticket 5"
                         });
                 });
